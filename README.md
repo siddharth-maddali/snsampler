@@ -1,3 +1,3 @@
-# `SNSampler`: Near-uniform sampling of $d$-dimensional unit spheres
+# `SNSampler`: Near-uniform sampling of high-dimensional unit spheres
 
 Click [here](tutorials/tutorial.md) for a tutorial.
