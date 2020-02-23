@@ -70,9 +70,9 @@ class SNSampler:
 
     def getRMatsFromQuats( self ):
         """
-        RMatFromQuat():
+        getRMatsFromQuats():
         Computes the rotation matrices corresponding to the set of unit quaternions.
-        Implements a vectorized form of the final equation in this section on Wikipedia:
+        Implements a vectorized form of the final equation in this Wikipedia section:
         https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Quaternion-derived_rotation_matrix
 
         Input: 
