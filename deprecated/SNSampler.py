@@ -17,7 +17,6 @@
 #####################################################################
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 import AuxArrayOps as aux  # enables some useful array operations
 
@@ -73,7 +72,8 @@ class SNSampler:
         """
         getRMatsFromQuats():
         Computes the rotation matrices corresponding to the set of unit quaternions.
-        Uses Built-in methods of the Rotation class for rapid conversion.
+        Implements a vectorized form of the final equation in this Wikipedia section:
+        https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Quaternion-derived_rotation_matrix
 
         Input: 
         None
@@ -82,9 +82,18 @@ class SNSampler:
         A 3x3xN array with each 3x3 slice denoting the orthogonal rotation matrix computed from 
         the unit quaternion that is the corresponding column of self.sample_points.
         """
-        R = Rotation.from_quat( self.sample_points.T )
-        self.RMat           = np.rollaxis( R.as_matrix(), 0, 3 )
-        self.RMatInverse    = np.rollaxis( R.inv().as_matrix(), 0, 3 )
+        I = np.eye( 3 ).reshape( 3, 3, 1 ).repeat( self.sample_points.shape[-1], axis=2 )
+        qr = self.sample_points[0,:].reshape( 1, 1, -1 )    # scalar part of the quaternions
+        v = self.sample_points[1:,:]                        # vector part of the quaternions
+        skew = aux.multiskew( v )
+
+        base = aux.multimatmul( v.reshape( 3, 1, -1 ), v.reshape( 1, 3, -1 ) ) +\
+            (qr**2)*I +\
+            aux.multimatmul( skew, skew )
+        delta  = 2. * qr * skew
+
+        self.RMat           = base + delta # matrices denoting rotations
+        self.RMatInverse    = base - delta # matrices denoting inverse rotations
         return
 
 
