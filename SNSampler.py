@@ -19,7 +19,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-import AuxArrayOps as aux  # enables some useful array operations
+import snsampler.AuxArrayOps as aux  # enables some useful array operations
 
 class SNSampler: 
 
