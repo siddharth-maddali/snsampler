@@ -87,6 +87,40 @@ class SNSampler:
         self.RMatInverse    = np.rollaxis( R.inv().as_matrix(), 0, 3 )
         return
 
+    def getTransformationSequence( self, start=0, stride=1 ):
+        """
+        getTansformationSequence():
+        Computes the **differential** rotational operators (in matrix form) that 
+        transform each rotation self.RMat[:,:,start+n*stride] into self.RMat[:,:,start+(n+1)*stride]. In other 
+        words, computes the 3x3xN array of matrices ARR such that:
 
+            ARR[:,:,start+n*stride] @ self.RMat[:,:,start+n*stride] = self.RMat[:,:,start+(n+1)*stride].
 
+        Here N is equal to len( list( range( start, self.RMat.shape[-1], stride ) ).
+        This is something like the 'diff' function in Matlab, but for rotations. 
+        It can be used to transform extremely large geometric datasets in a 
+        sequential manner, without having to undo the previous transformation.
+
+        Input: 
+        None
+
+        Output: 
+        A 3x3xN array (same size as self.RMat).
+
+        The first elements of ARR and self.RMat are the same (i.e., the difference 
+        is assumed starting from the identity rotation).
+        
+        """
+        try:
+            these = list( range( start, self.RMat.shape[-1], stride ) )
+            myarr = np.zeros( ( 3, 3, len( these ) ) )
+            myarr[:,:,0] = self.RMat[:,:,these[0]]
+            myarr[:,:,1:] = aux.multimatmul( 
+                self.RMat[:,:,these[1:]], 
+                self.RMatInverse[:,:,these[:-1]] 
+            )
+            return myarr, these
+        except AttributeError:  # i.e., if self.RMat and/or self.RMatInverse not found ...
+            print( 'ERROR: Try running getRMatsFromQuats() first. ' )
+            return
 
